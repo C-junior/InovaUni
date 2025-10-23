@@ -76,6 +76,62 @@
         </p>
       </div>
 
+      <!-- Crop -->
+      <div>
+        <label for="crop" class="block text-sm font-medium text-gray-700 mb-2">
+          Cultura *
+        </label>
+        <select
+          id="crop"
+          v-model="form.crop"
+          required
+          class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white"
+          :class="{ 'border-error ring-2 ring-error-200': errors.crop }"
+        >
+          <option value="">Selecione a cultura</option>
+          <option v-for="crop in crops" :key="crop.cultura" :value="crop.cultura">
+            {{ crop.cultura }}
+          </option>
+        </select>
+        <p v-if="errors.crop" class="mt-2 text-sm text-error flex items-center">
+          <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+          {{ errors.crop }}
+        </p>
+        <p v-if="form.crop" class="mt-2 text-sm text-gray-600">
+          {{ crops.find(c => c.cultura === form.crop)?.descricao }}
+        </p>
+      </div>
+
+      <!-- Irrigation Type -->
+      <div>
+        <label for="irrigationType" class="block text-sm font-medium text-gray-700 mb-2">
+          Tipo de Irrigação *
+        </label>
+        <select
+          id="irrigationType"
+          v-model="form.irrigationType"
+          required
+          class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white"
+          :class="{ 'border-error ring-2 ring-error-200': errors.irrigationType }"
+        >
+          <option value="">Selecione o tipo de irrigação</option>
+          <option v-for="(system, name) in irrigationSystems" :key="name" :value="name">
+            {{ name }}
+          </option>
+        </select>
+        <p v-if="errors.irrigationType" class="mt-2 text-sm text-error flex items-center">
+          <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+          {{ errors.irrigationType }}
+        </p>
+        <p v-if="form.irrigationType" class="mt-2 text-sm text-gray-600">
+          {{ irrigationSystems[form.irrigationType]?.descricao }}
+        </p>
+      </div>
+
       <!-- Error Message -->
       <div v-if="submitError" class="bg-error-50 border border-error-200 rounded-lg p-4">
         <div class="flex">
@@ -114,6 +170,7 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { useFarmsStore } from '../stores/farms.js'
+import kcData from '../stores/kcdata.json'
 
 const props = defineProps({
   farm: {
@@ -134,15 +191,23 @@ const submitError = ref('')
 const form = reactive({
   name: '',
   area: null,
-  soilType: ''
+  soilType: '',
+  crop: '',
+  irrigationType: ''
 })
 
 // Form validation errors
 const errors = reactive({
   name: '',
   area: '',
-  soilType: ''
+  soilType: '',
+  crop: '',
+  irrigationType: ''
 })
+
+// Data from kcData.json
+const crops = kcData.kcValues
+const irrigationSystems = kcData.irrigationSystems
 
 // Watch for prop changes to populate form
 watch(() => props.farm, (newFarm) => {
@@ -150,6 +215,8 @@ watch(() => props.farm, (newFarm) => {
     form.name = newFarm.name || ''
     form.area = newFarm.area || null
     form.soilType = newFarm.soilType || ''
+    form.crop = newFarm.crop || ''
+    form.irrigationType = newFarm.irrigationType || ''
   } else {
     resetForm()
   }
@@ -162,6 +229,8 @@ const resetForm = () => {
   form.name = ''
   form.area = null
   form.soilType = ''
+  form.crop = ''
+  form.irrigationType = ''
   clearErrors()
   submitError.value = ''
 }
@@ -173,6 +242,8 @@ const clearErrors = () => {
   errors.name = ''
   errors.area = ''
   errors.soilType = ''
+  errors.crop = ''
+  errors.irrigationType = ''
 }
 
 /**
@@ -208,6 +279,18 @@ const validateForm = () => {
     isValid = false
   }
 
+  // Validate crop
+  if (!form.crop || form.crop.trim().length === 0) {
+    errors.crop = 'Selecione uma cultura'
+    isValid = false
+  }
+
+  // Validate irrigation type
+  if (!form.irrigationType || form.irrigationType.trim().length === 0) {
+    errors.irrigationType = 'Selecione um tipo de irrigação'
+    isValid = false
+  }
+
   return isValid
 }
 
@@ -226,7 +309,9 @@ const handleSubmit = async () => {
     const farmData = {
       name: form.name.trim(),
       area: form.area,
-      soilType: form.soilType
+      soilType: form.soilType,
+      crop: form.crop,
+      irrigationType: form.irrigationType
     }
 
     if (isEditing.value) {

@@ -1,21 +1,85 @@
 {
   "kcValues": [
-    { "cultura": "Milho", "kc": 1.2, "descricao": "Cultura de ciclo médio, alta demanda hídrica" },
-    { "cultura": "Soja", "kc": 1.15, "descricao": "Leguminosa, demanda hídrica moderada a alta" },
-    { "cultura": "Trigo", "kc": 1.15, "descricao": "Cereal de inverno, demanda hídrica moderada" },
-    { "cultura": "Arroz", "kc": 1.2, "descricao": "Cultura irrigada por inundação, alta demanda hídrica" },
-    { "cultura": "Feijão", "kc": 1.05, "descricao": "Leguminosa de ciclo curto, demanda hídrica moderada" },
-    { "cultura": "Algodão", "kc": 1.15, "descricao": "Cultura perene, demanda hídrica alta" },
-    { "cultura": "Cana-de-açúcar", "kc": 1.25, "descricao": "Cultura semi-perene, muito alta demanda hídrica" },
-    { "cultura": "Café", "kc": 1.0, "descricao": "Cultura perene, demanda hídrica moderada" },
-    { "cultura": "Tomate", "kc": 1.15, "descricao": "Hortaliça, alta demanda hídrica e frequente" },
-    { "cultura": "Batata", "kc": 1.15, "descricao": "Tubérculo, demanda hídrica alta e constante" },
-    { "cultura": "Cebola", "kc": 1.05, "descricao": "Bulbo, demanda hídrica moderada" },
-    { "cultura": "Alface", "kc": 1.0, "descricao": "Folhosa, demanda hídrica frequente e leve" },
-    { "cultura": "Cenoura", "kc": 1.05, "descricao": "Raiz, demanda hídrica moderada e constante" },
-    { "cultura": "Abóbora", "kc": 1.0, "descricao": "Cucurbitácea, demanda hídrica moderada" },
-    { "cultura": "Melancia", "kc": 1.0, "descricao": "Cucurbitácea, demanda hídrica moderada a alta" },
-    { "cultura": "Melão", "kc": 1.05, "descricao": "Cucurbitácea, demanda hídrica moderada a alta" }
+    {
+      "cultura": "Milho",
+      "kc": 1.2,
+      "descricao": "Cultura de ciclo médio, alta demanda hídrica"
+    },
+    {
+      "cultura": "Soja",
+      "kc": 1.15,
+      "descricao": "Leguminosa, demanda hídrica moderada a alta"
+    },
+    {
+      "cultura": "Trigo",
+      "kc": 1.15,
+      "descricao": "Cereal de inverno, demanda hídrica moderada"
+    },
+    {
+      "cultura": "Arroz",
+      "kc": 1.2,
+      "descricao": "Cultura irrigada por inundação, alta demanda hídrica"
+    },
+    {
+      "cultura": "Feijão",
+      "kc": 1.05,
+      "descricao": "Leguminosa de ciclo curto, demanda hídrica moderada"
+    },
+    {
+      "cultura": "Algodão",
+      "kc": 1.15,
+      "descricao": "Cultura perene, demanda hídrica alta"
+    },
+    {
+      "cultura": "Cana-de-açúcar",
+      "kc": 1.25,
+      "descricao": "Cultura semi-perene, muito alta demanda hídrica"
+    },
+    {
+      "cultura": "Café",
+      "kc": 1.0,
+      "descricao": "Cultura perene, demanda hídrica moderada"
+    },
+    {
+      "cultura": "Tomate",
+      "kc": 1.15,
+      "descricao": "Hortaliça, alta demanda hídrica e frequente"
+    },
+    {
+      "cultura": "Batata",
+      "kc": 1.15,
+      "descricao": "Tubérculo, demanda hídrica alta e constante"
+    },
+    {
+      "cultura": "Cebola",
+      "kc": 1.05,
+      "descricao": "Bulbo, demanda hídrica moderada"
+    },
+    {
+      "cultura": "Alface",
+      "kc": 1.0,
+      "descricao": "Folhosa, demanda hídrica frequente e leve"
+    },
+    {
+      "cultura": "Cenoura",
+      "kc": 1.05,
+      "descricao": "Raiz, demanda hídrica moderada e constante"
+    },
+    {
+      "cultura": "Abóbora",
+      "kc": 1.0,
+      "descricao": "Cucurbitácea, demanda hídrica moderada"
+    },
+    {
+      "cultura": "Melancia",
+      "kc": 1.0,
+      "descricao": "Cucurbitácea, demanda hídrica moderada a alta"
+    },
+    {
+      "cultura": "Melão",
+      "kc": 1.05,
+      "descricao": "Cucurbitácea, demanda hídrica moderada a alta"
+    }
   ],
   "soilTypes": {
     "Arenoso": {
@@ -25,14 +89,14 @@
       "lamina": "baixa"
     },
     "Argiloso": {
-      "retencao": "alta", 
+      "retencao": "alta",
       "drenagem": "lenta",
       "frequencia": "baixa",
       "lamina": "alta"
     },
     "Franco": {
       "retencao": "média",
-      "drenagem": "moderada", 
+      "drenagem": "moderada",
       "frequencia": "moderada",
       "lamina": "média"
     }

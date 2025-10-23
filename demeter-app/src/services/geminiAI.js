@@ -47,10 +47,17 @@ class GeminiAIService {
 
       // Enriquece dados da fazenda com informações do store
       if (farmData) {
+        console.log('Processando dados da fazenda:', farmData);
         const cropInfo = this.getCropInfo(farmData.crop);
         const soilInfo = this.getSoilInfo(farmData.soilType);
-        const irrigationInfo = this.getIrrigationInfo(farmData.irrigationSystem);
+        const irrigationInfo = this.getIrrigationInfo(farmData.irrigationType);
         const cropDbInfo = this.getCropDatabaseInfo(farmData.crop);
+        
+        console.log('Informações encontradas:');
+        console.log('- Crop info:', cropInfo);
+        console.log('- Soil info:', soilInfo);
+        console.log('- Irrigation info:', irrigationInfo);
+        console.log('- Crop DB info:', cropDbInfo);
         
         contextMessage += `Dados da Fazenda:
         - Nome: ${farmData.name || 'Não informado'}
@@ -58,7 +65,7 @@ class GeminiAIService {
         - Área: ${farmData.area || 'Não informada'} hectares
         - Cultura: ${farmData.crop || 'Não informada'}${cropInfo ? ` (Kc: ${cropInfo.kc})` : ''}
         - Tipo de Solo: ${farmData.soilType || 'Não informado'}${soilInfo ? ` (Retenção: ${soilInfo.retencao}, Drenagem: ${soilInfo.drenagem})` : ''}
-        - Sistema de Irrigação: ${farmData.irrigationSystem || 'Não informado'}${irrigationInfo ? ` (Eficiência: ${irrigationInfo.eficiencia * 100}%)` : ''}`;
+        - Sistema de Irrigação: ${farmData.irrigationType || 'Não informado'}${irrigationInfo ? ` (Eficiência: ${irrigationInfo.eficiencia * 100}%)` : ''}`;
         
         // Adiciona informações detalhadas da cultura se disponível
         if (cropDbInfo) {
@@ -133,7 +140,15 @@ if (groundingMetadata) {
   getSoilInfo(soilType) {
     if (!soilType) return null;
     
-    return kcStore.soilTypes[soilType];
+    // Mapear os tipos de solo para as chaves corretas no kcData.json
+    const soilMapping = {
+      'arenoso': 'Arenoso',
+      'argiloso': 'Argiloso', 
+      'humoso': 'Franco' // Mapear humoso para Franco
+    };
+    
+    const mappedSoilType = soilMapping[soilType.toLowerCase()] || soilType;
+    return kcStore.soilTypes[mappedSoilType];
   }
 
   getIrrigationInfo(systemType) {
