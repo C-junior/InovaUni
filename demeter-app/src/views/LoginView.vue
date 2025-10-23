@@ -5,7 +5,7 @@
       <!-- Logo/Header Section -->
       <div class="text-center">
         <div
-          class="mx-auto p-6 flex items-center justify-center animate-bounce-subtle">
+          class="mx-auto w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center animate-bounce-subtle">
           <img src="/images/logo.png" alt="HydroCultivo AI Logo" class="w-full h-full object-contain" />
         </div>
         <h1 class="text-3xl sm:text-4xl font-bold text-secondary mb-3">
