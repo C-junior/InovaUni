@@ -14,7 +14,9 @@
               </svg>
             </button>
             <h1 class="text-xl sm:text-2xl font-bold text-secondary">Demeter</h1>
-            <span class="hidden sm:inline ml-3 text-sm text-gray-500">Cálculo ETo</span>
+            <span class="hidden sm:inline ml-3 text-sm text-gray-500">
+              {{ showChat ? 'Consultor IA' : 'Cálculo ETo' }}
+            </span>
           </div>
           
           <div class="flex items-center space-x-2 sm:space-x-4">
@@ -44,9 +46,12 @@
     </header>
 
     <!-- Main content -->
-    <main class="max-w-4xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+    <main class="max-w-6xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <!-- Farm Info -->
       <div v-if="farm" class="mb-6 sm:mb-8 animate-fade-in">
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Cálculo ETo</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          {{ showChat ? 'Consultor de Irrigação IA' : 'Cálculo ETo' }}
+        </h2>
         <div class="bg-primary-50 border border-primary-200 rounded-lg p-3 sm:p-4">
           <p class="text-sm sm:text-base text-gray-700">
             <span class="font-medium text-primary-700">Fazenda:</span> {{ farm.name }}
@@ -57,18 +62,59 @@
         </div>
       </div>
 
-      <!-- Calculation Form -->
-      <div class="mb-8">
-        <CalculationForm 
-          :farm="farm"
-          @calculation-complete="handleCalculationComplete"
-          @calculation-error="handleCalculationError"
+      <!-- Chat with AI -->
+      <div v-if="showChat" class="animate-fade-in">
+        <AIChat 
+          :farm-data="farm"
+          :etc-data="calculationResult"
+          @close="closeChat"
         />
       </div>
 
-      <!-- Results Display -->
-      <div v-if="calculationResult" class="mb-8">
-        <ResultCard :result="calculationResult" />
+      <!-- Calculation Form (only show when not in chat) -->
+      <div v-else>
+        <!-- Calculation Form -->
+        <div class="mb-8">
+          <CalculationForm 
+            :farm="farm"
+            @calculation-complete="handleCalculationComplete"
+            @calculation-error="handleCalculationError"
+          />
+        </div>
+
+        <!-- Results Display with AI Chat Button -->
+        <div v-if="calculationResult" class="mb-8 space-y-6">
+          <ResultCard :result="calculationResult" />
+          
+          <!-- AI Chat Button -->
+          <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Consulte nosso Especialista em Irrigação</h3>
+                <p class="text-gray-600 mb-4">
+                  Agora que você tem os dados de evapotranspiração, converse com nossa IA especializada 
+                  para obter recomendações personalizadas sobre manejo de irrigação e otimização da lâmina de água.
+                </p>
+                <button
+                  @click="openChat"
+                  class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <span>Conversar com Especialista IA</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Loading State -->
@@ -88,21 +134,22 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user.js'
 import { useFarmsStore } from '../stores/farms.js'
 import { navigationHelpers } from '../router/index.js'
 import CalculationForm from '../components/CalculationForm.vue'
 import ResultCard from '../components/ResultCard.vue'
+import AIChat from '../components/AIChat.vue'
 
 const route = useRoute()
-const router = useRouter()
 const userStore = useUserStore()
 const farmsStore = useFarmsStore()
 
 const farm = ref(null)
 const calculationResult = ref(null)
 const isLoading = ref(false)
+const showChat = ref(false)
 
 const userDisplayName = computed(() => userStore.userDisplayName)
 const userEmail = computed(() => userStore.userEmail)
@@ -150,16 +197,51 @@ onMounted(async () => {
  */
 const handleCalculationComplete = async (calculationData) => {
   try {
-    calculationResult.value = calculationData
+    // Extract the result from the calculation data
+    const { result, inputs } = calculationData
+    
+    // Calculate ETc based on crop type
+    let kc = 1.0 // Default coefficient
+    
+    // Define Kc based on crop (approximate values)
+    const cropKcValues = {
+      'milho': 1.2,
+      'soja': 1.15,
+      'trigo': 1.15,
+      'arroz': 1.2,
+      'feijão': 1.05,
+      'algodão': 1.15,
+      'cana-de-açúcar': 1.25,
+      'café': 1.0,
+      'tomate': 1.15,
+      'batata': 1.15
+    }
+    
+    const farmCrop = farm.value.crop?.toLowerCase() || ''
+    kc = cropKcValues[farmCrop] || 1.0
+    
+    const etc = result.eto * kc
+    
+    // Prepare complete result
+    calculationResult.value = {
+      ...result,
+      etc: parseFloat(etc.toFixed(2)),
+      kc: kc,
+      date: new Date().toISOString().split('T')[0],
+      farmId: farm.value.id,
+      farmName: farm.value.name,
+      crop: farm.value.crop,
+      inputs
+    }
     
     // Save calculation to Firestore
     if (farm.value?.id) {
-      await farmsStore.saveCalculation(farm.value.id, calculationData)
+      await farmsStore.saveCalculation(farm.value.id, calculationResult.value)
       console.log('Calculation saved successfully')
     }
     
     // Show success notification
-    console.log('Calculation completed successfully:', calculationData)
+    console.log('Calculation completed successfully:', calculationResult.value)
   } catch (error) {
     console.error('Failed to save calculation:', error)
     // Still show the result even if saving fails
@@ -175,9 +257,29 @@ const handleCalculationError = (error) => {
 }
 
 /**
+ * Open AI chat with current calculation results
+ */
+const openChat = () => {
+  if (calculationResult.value) {
+    showChat.value = true
+  }
+}
+
+/**
+ * Close chat and return to calculation view
+ */
+const closeChat = () => {
+  showChat.value = false
+}
+
+/**
  * Go back to dashboard
  */
 const goBack = () => {
-  navigationHelpers.goToDashboard()
+  if (showChat.value) {
+    closeChat()
+  } else {
+    navigationHelpers.goToDashboard()
+  }
 }
 </script>

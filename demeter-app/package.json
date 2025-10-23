@@ -13,6 +13,7 @@
     "lint": "eslint . --fix --cache"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.12.2",
     "firebase": "^12.4.0",
     "pinia": "^3.0.3",
