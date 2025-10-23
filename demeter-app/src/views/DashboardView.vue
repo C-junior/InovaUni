@@ -5,8 +5,8 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 sm:h-18">
           <div class="flex items-center">
-            <img src="/images/logo.png" alt="Demeter Logo" class="w-8 h-8 sm:w-10 sm:h-10 mr-3 object-contain" />
-            <h1 class="text-xl sm:text-2xl font-bold text-secondary">Demeter</h1>
+            <img src="/images/logo.png" alt="HydroCultivo AI Logo" class="w-8 h-8 sm:w-10 sm:h-10 mr-3 object-contain" />
+            <h1 class="text-xl sm:text-2xl font-bold text-secondary">HydroCultivo AI</h1>
             <span class="hidden sm:inline ml-3 text-sm text-gray-500">Dashboard</span>
           </div>
 
@@ -71,7 +71,7 @@
         </div>
 
         <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-          Bem-vindo ao Demeter!
+          Bem-vindo ao HydroCultivo AI!
         </h2>
 
         <p class="text-base sm:text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">

@@ -1,6 +1,6 @@
-# Demeter - Aplicativo de Cálculo de ETo
+# HydroCultivo AI - Irrigação Inteligente
 
-Aplicativo web para cálculo de evapotranspiração de referência (ETo) usando o método FAO-56 Penman-Monteith para produtores agrícolas de Palmas (TO).
+Aplicativo web com IA para cálculo de evapotranspiração de referência (ETo) usando o método FAO-56 Penman-Monteith e assistente inteligente para otimização da irrigação para produtores agrícolas.
 
 ## Tecnologias Utilizadas
 

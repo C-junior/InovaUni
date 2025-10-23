@@ -2,7 +2,7 @@
 
 ## Funcionalidade Implementada
 
-A aplicação Demeter agora possui persistência completa das conversas com a IA especialista em irrigação para cada fazenda individual.
+A aplicação HydroCultivo AI agora possui persistência completa das conversas com a IA especialista em irrigação para cada fazenda individual.
 
 ## Como Funciona
 

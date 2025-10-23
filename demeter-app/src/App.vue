@@ -14,7 +14,7 @@ const loading = computed(() => userStore.loading)
       <div class="text-center animate-fade-in">
         <div class="w-12 h-12 border-4 border-primary-200 border-t-primary rounded-full animate-spin mx-auto mb-6"></div>
         <div class="space-y-2">
-          <p class="text-lg font-medium text-gray-900">Demeter</p>
+          <p class="text-lg font-medium text-gray-900">HydroCultivo AI</p>
           <p class="text-sm text-gray-600">Carregando aplicação...</p>
         </div>
       </div>

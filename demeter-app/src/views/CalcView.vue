@@ -13,7 +13,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h1 class="text-xl sm:text-2xl font-bold text-secondary">Demeter</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-secondary">HydroCultivo AI</h1>
             <span class="hidden sm:inline ml-3 text-sm text-gray-500">
               {{ showChat ? 'Consultor IA' : 'Cálculo ETo' }}
             </span>

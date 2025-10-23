@@ -15,7 +15,7 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue'),
       meta: { 
         requiresGuest: true,
-        title: 'Login - Demeter'
+        title: 'Login - HydroCultivo AI'
       }
     },
     {
@@ -24,7 +24,7 @@ const router = createRouter({
       component: () => import('../views/DashboardView.vue'),
       meta: { 
         requiresAuth: true,
-        title: 'Dashboard - Demeter'
+        title: 'Dashboard - HydroCultivo AI'
       }
     },
     {
@@ -33,7 +33,7 @@ const router = createRouter({
       component: () => import('../views/FarmRegistrationView.vue'),
       meta: { 
         requiresAuth: true,
-        title: 'Nova Fazenda - Demeter'
+        title: 'Nova Fazenda - HydroCultivo AI'
       }
     },
     {
@@ -42,7 +42,7 @@ const router = createRouter({
       component: () => import('../views/FarmEditView.vue'),
       meta: { 
         requiresAuth: true,
-        title: 'Editar Fazenda - Demeter',
+        title: 'Editar Fazenda - HydroCultivo AI',
         validateFarmAccess: true
       }
     },
@@ -52,7 +52,7 @@ const router = createRouter({
       component: () => import('../views/CalcView.vue'),
       meta: { 
         requiresAuth: true,
-        title: 'Cálculo ETo - Demeter',
+        title: 'Cálculo ETo - HydroCultivo AI',
         validateFarmAccess: true
       }
     },
@@ -62,7 +62,7 @@ const router = createRouter({
       component: () => import('../views/FarmHistoryView.vue'),
       meta: { 
         requiresAuth: true,
-        title: 'Histórico - Demeter',
+        title: 'Histórico - HydroCultivo AI',
         validateFarmAccess: true
       }
     },

@@ -5,11 +5,11 @@
       <!-- Logo/Header Section -->
       <div class="text-center">
         <div
-          class="mx-auto  flex items-center justify-center animate-bounce-subtle">
-          <img src="/images/logo.png" alt="Demeter Logo" class="w-full h-full object-contain" />
+          class="mx-auto p-6 flex items-center justify-center animate-bounce-subtle">
+          <img src="/images/logo.png" alt="HydroCultivo AI Logo" class="w-full h-full object-contain" />
         </div>
         <h1 class="text-3xl sm:text-4xl font-bold text-secondary mb-3">
-          Demeter
+          HydroCultivo AI
         </h1>
         <p class="text-base sm:text-lg text-gray-700 mb-2 px-2">
           Cálculo de Evapotranspiração de Referência
