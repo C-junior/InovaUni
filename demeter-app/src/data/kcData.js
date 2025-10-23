@@ -1,4 +1,4 @@
-{
+export const kcData = {
   "kcValues": [
     { "cultura": "Milho", "kc": 1.2, "descricao": "Cultura de ciclo médio, alta demanda hídrica" },
     { "cultura": "Soja", "kc": 1.15, "descricao": "Leguminosa, demanda hídrica moderada a alta" },
@@ -55,4 +55,6 @@
       "descricao": "Boa eficiência, grandes áreas"
     }
   }
-}
+};
+
+export default kcData;

@@ -141,6 +141,7 @@ import { navigationHelpers } from '../router/index.js'
 import CalculationForm from '../components/CalculationForm.vue'
 import ResultCard from '../components/ResultCard.vue'
 import AIChat from '../components/AIChat.vue'
+import kcStore from '@/data/kcData.js'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -200,25 +201,21 @@ const handleCalculationComplete = async (calculationData) => {
     // Extract the result from the calculation data
     const { result, inputs } = calculationData
     
-    // Calculate ETc based on crop type
+    // Calculate ETc based on crop type using data from JSON
     let kc = 1.0 // Default coefficient
     
-    // Define Kc based on crop (approximate values)
-    const cropKcValues = {
-      'milho': 1.2,
-      'soja': 1.15,
-      'trigo': 1.15,
-      'arroz': 1.2,
-      'feijão': 1.05,
-      'algodão': 1.15,
-      'cana-de-açúcar': 1.25,
-      'café': 1.0,
-      'tomate': 1.15,
-      'batata': 1.15
-    }
-    
     const farmCrop = farm.value.crop?.toLowerCase() || ''
-    kc = cropKcValues[farmCrop] || 1.0
+    
+    // Busca Kc no arquivo de dados
+    const cropData = kcStore.kcValues.find(item => 
+      item.cultura.toLowerCase() === farmCrop
+    )
+    
+    kc = cropData ? cropData.kc : 1.0
+    
+    console.log('Cultura da fazenda:', farmCrop)
+    console.log('Dados da cultura encontrados:', cropData)
+    console.log('Kc utilizado:', kc)
     
     const etc = result.eto * kc
     

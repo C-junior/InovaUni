@@ -16,6 +16,7 @@ O sistema agora integra um chat com IA especializada em irrigação que utiliza 
 ### Cálculo ETo
 
 O sistema utiliza o formulário de cálculo original que permite:
+
 - **Dados da API meteorológica** (automático)
 - **Entrada manual** de dados meteorológicos
 - **Radiação Solar**: Configurável pelo usuário
