@@ -1,0 +1,7 @@
+{
+  "kcValues": [
+    { "cultura": "Milho", "kc": 1.2 },
+    { "cultura": "Soja", "kc": 1.15 },
+    { "cultura": "Trigo", "kc": 1.15 }
+  ]
+}

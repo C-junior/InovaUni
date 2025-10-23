@@ -4,7 +4,7 @@ class GeminiAIService {
   constructor() {
     this.apiKey = "AIzaSyAQwXT0qKdZufq7AMSaKHa5fgGb43NM3AU";
     this.genAI = new GoogleGenerativeAI(this.apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
 
     // Contexto do especialista em irrigação
     this.systemPrompt = `Você é um especialista em irrigação e manejo de água na agricultura. 
@@ -16,9 +16,17 @@ class GeminiAIService {
     - Considerar fatores como tipo de cultura, estágio de desenvolvimento, condições climáticas
     - Recomendar a lâmina de água ideal para maximizar a eficiência
     - Sugerir estratégias de manejo de irrigação
-    - Explicar de forma clara e técnica suas recomendações
-    
-    Sempre responda de forma profissional, técnica mas acessível, focando na eficiência hídrica.`;
+    - Explicar de forma clara  suas recomendações
+    - Você é um especialista em irrigação que explica de forma simples e direta para o produtor rural.
+    - Sempre analise os dados recebidos da fazenda, seja breve e objetivo.
+    -Use frases curtas, sem termos técnicos complexos. Foque na resposta prática, usando apenas os dados da fazenda e cultura informados.
+
+      - Informe a lâmina de água (mm/dia) pronta para uso.
+      - Oriente o manejo com dicas práticas, fáceis de aplicar.
+      - Se faltar algum dado importante (ex: Kc), recomende consultar o arquivo de dados da fazenda ou pergunte.
+      - NÃO use textos longos ou explicações técnicas. Seja direto na solução!
+      - Use sempre os dados que estão descritos na fazenda informada.
+    `;
   }
 
   async generateResponse(userMessage, farmData = null, etcData = null) {

@@ -227,6 +227,7 @@ const handleCalculationComplete = async (calculationData) => {
       ...result,
       etc: parseFloat(etc.toFixed(2)),
       kc: kc,
+      radiation: inputs.solarRadiation || 15, // Define radiação solar padrão como 15 MJ/m²/dia
       date: new Date().toISOString().split('T')[0],
       farmId: farm.value.id,
       farmName: farm.value.name,

@@ -250,7 +250,7 @@ export function createSampleInputs() {
     tmin: 22.8,
     humidity: 65,
     windSpeed: 2.1,
-    solarRadiation: 22.5,
+    solarRadiation: 15,
     julianDay: getJulianDay()
   };
 }
