@@ -170,7 +170,7 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { useFarmsStore } from '../stores/farms.js'
-import kcData from '../stores/kcdata.json'
+import kcData from '@/data/kcData.js'
 
 const props = defineProps({
   farm: {
