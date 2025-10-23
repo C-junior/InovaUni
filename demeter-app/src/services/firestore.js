@@ -6,12 +6,14 @@ import {
   deleteDoc, 
   getDoc, 
   getDocs, 
-  query, 
-  where,
+  query,
   serverTimestamp 
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import { getCurrentUser } from './auth.js';
+
+// Export db for use in other modules
+export { db };
 
 /**
  * Get reference to user's farms collection

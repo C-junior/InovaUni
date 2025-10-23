@@ -13,11 +13,22 @@
           <p class="text-sm text-gray-600">Assistente para otimização da lâmina de água</p>
         </div>
       </div>
-      <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+      <div class="flex items-center space-x-2">
+        <button 
+          @click="clearChatHistory" 
+          class="text-gray-500 hover:text-red-600 transition-colors"
+          title="Limpar histórico da conversa"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Área de Mensagens -->
@@ -67,6 +78,7 @@
 
 <script>
 import geminiAI from '@/services/geminiAI'
+import { useFarmsStore } from '@/stores/farms'
 
 export default {
   name: 'AIChat',
@@ -80,6 +92,10 @@ export default {
       required: true
     }
   },
+  setup() {
+    const farmsStore = useFarmsStore()
+    return { farmsStore }
+  },
   data() {
     return {
       messages: [],
@@ -89,19 +105,46 @@ export default {
     }
   },
   async mounted() {
+    await this.loadChatHistory()
     await this.initializeChat()
   },
   methods: {
+    async loadChatHistory() {
+      if (!this.farmData?.id) return
+      
+      try {
+        const history = await this.farmsStore.fetchFarmChatHistory(this.farmData.id)
+        this.messages = history.map(msg => ({
+          id: msg.id,
+          type: msg.type,
+          text: msg.text,
+          timestamp: msg.createdAt?.toDate() || new Date(msg.timestamp)
+        }))
+        
+        // Atualiza o contador de IDs
+        if (this.messages.length > 0) {
+          this.messageIdCounter = Math.max(...this.messages.map(m => parseInt(m.id) || 0)) + 1
+        }
+      } catch (error) {
+        console.error('Erro ao carregar histórico do chat:', error)
+      }
+    },
+
     async initializeChat() {
-      // Adiciona mensagem de boas-vindas
-      this.addMessage('ai', 'Olá! Sou seu especialista em irrigação. Analisei os dados da sua fazenda e calculei a evapotranspiração. Vou gerar uma recomendação inicial para você.')
+      // Se já tem mensagens no histórico, não adiciona mensagem inicial
+      if (this.messages.length > 0) {
+        return
+      }
+      
+      // Adiciona mensagem de boas-vindas apenas se for a primeira vez
+      await this.addMessage('ai', 'Olá! Sou seu especialista em irrigação. Analisei os dados da sua fazenda e calculei a evapotranspiração. Vou gerar uma recomendação inicial para você.')
       
       this.isLoading = true
       try {
         const initialRecommendation = await geminiAI.getInitialRecommendation(this.farmData, this.etcData)
-        this.addMessage('ai', initialRecommendation)
+        await this.addMessage('ai', initialRecommendation)
       } catch {
-        this.addMessage('ai', 'Desculpe, ocorreu um erro ao gerar a recomendação inicial. Você pode fazer perguntas específicas sobre irrigação que tentarei ajudar.')
+        await this.addMessage('ai', 'Desculpe, ocorreu um erro ao gerar a recomendação inicial. Você pode fazer perguntas específicas sobre irrigação que tentarei ajudar.')
       } finally {
         this.isLoading = false
       }
@@ -111,27 +154,42 @@ export default {
       if (!this.newMessage.trim() || this.isLoading) return
 
       const userMessage = this.newMessage.trim()
-      this.addMessage('user', userMessage)
+      await this.addMessage('user', userMessage)
       this.newMessage = ''
       
       this.isLoading = true
       try {
-        const response = await geminiAI.generateResponse(userMessage, this.farmData, this.etcData)
-        this.addMessage('ai', response)
+        const response = await geminiAI.generateResponse(userMessage, this.farmData, this.etcData, this.messages)
+        await this.addMessage('ai', response)
       } catch {
-        this.addMessage('ai', 'Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.')
+        await this.addMessage('ai', 'Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.')
       } finally {
         this.isLoading = false
       }
     },
 
-    addMessage(type, text) {
-      this.messages.push({
+    async addMessage(type, text) {
+      const message = {
         id: this.messageIdCounter++,
         type: type === 'user' ? 'user-message' : 'ai-message',
         text,
         timestamp: new Date()
-      })
+      }
+      
+      this.messages.push(message)
+      
+      // Salva no Firestore se tiver farmId
+      if (this.farmData?.id) {
+        try {
+          await this.farmsStore.saveChatMessage(this.farmData.id, {
+            type: message.type,
+            text: message.text,
+            timestamp: message.timestamp
+          })
+        } catch (error) {
+          console.error('Erro ao salvar mensagem:', error)
+        }
+      }
       
       this.$nextTick(() => {
         this.scrollToBottom()
@@ -157,6 +215,19 @@ export default {
       const container = this.$refs.messagesContainer
       if (container) {
         container.scrollTop = container.scrollHeight
+      }
+    },
+
+    async clearChatHistory() {
+      if (!this.farmData?.id) return
+      
+      try {
+        await this.farmsStore.clearFarmChatHistory(this.farmData.id)
+        this.messages = []
+        this.messageIdCounter = 1
+        await this.initializeChat()
+      } catch (error) {
+        console.error('Erro ao limpar histórico:', error)
       }
     }
   }

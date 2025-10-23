@@ -25,19 +25,24 @@ class GeminiAIService {
       ...generationConfig
     });
 
-    this.systemPrompt = `Você é um especialista em irrigação que explica de forma simples e direta para o produtor rural.
+    this.systemPrompt = `Você é Demeter AI se apresente com esse nome, um especialista em irrigação que conversa de forma natural e amigável com o produtor rural.
     
     REGRAS IMPORTANTES:
     - SEMPRE use os dados fornecidos da fazenda (nome, localização, área, cultura, solo, sistema de irrigação)
     - NUNCA diga que dados estão "indefinidos" se eles foram fornecidos
     - Use os valores de Kc, características do solo e eficiência do sistema que estão nos dados
-    - Seja breve e objetivo, use frases curtas
-    - Informe a lâmina de água (mm/dia) pronta para uso
+    - Seja conversacional e didático, explique o "porquê" das recomendações
+    - Informe a lâmina de água (mm/dia) de forma clara e prática
     - Se faltar algum dado específico, busque informação complementar
-    - Foque na solução prática para o produtor`;
+    - Foque na solução prática para o produtor
+    - NUNCA inclua códigos, JSON, estruturas técnicas ou tags como [ALTERACAO_SUGERIDA]
+    - Suas respostas devem ser APENAS texto natural, como uma conversa entre especialista e produtor
+    - Quando sugerir mudanças no sistema de irrigação, explique os benefícios de forma didática
+    - Use linguagem acessível, evite jargões técnicos desnecessários
+    - Não formate suas respostas com códigos ou estruturas de dados`;
   }
 
-  async generateResponse(userMessage, farmData = null, etcData = null) {
+  async generateResponse(userMessage, farmData = null, etcData = null, chatHistory = []) {
     try {
       // Debug: log dos dados recebidos
       console.log('Dados da fazenda recebidos:', farmData);
@@ -91,7 +96,18 @@ class GeminiAIService {
         - Data do cálculo: ${etcData.date ?? new Date().toISOString().split('T')[0]}\n\n`;
       }
 
-      contextMessage += `Pergunta do usuário: ${userMessage}`;
+      // Adiciona contexto da conversa anterior (últimas 10 mensagens para não sobrecarregar)
+      if (chatHistory && chatHistory.length > 0) {
+        const recentHistory = chatHistory.slice(-10);
+        contextMessage += `Histórico da conversa recente:\n`;
+        recentHistory.forEach(msg => {
+          const role = msg.type === 'user-message' ? 'Usuário' : 'IA';
+          contextMessage += `${role}: ${msg.text}\n`;
+        });
+        contextMessage += '\n';
+      }
+
+      contextMessage += `Pergunta atual do usuário: ${userMessage}`;
 
       const result = await this.model.generateContent(contextMessage);
       const response = await result.response;
@@ -106,7 +122,20 @@ if (groundingMetadata) {
 }
 
       
-      return response.text();
+      // Limpa qualquer código estruturado que possa ter aparecido na resposta
+      let cleanResponse = response.text();
+      
+      // Remove tags de alteração sugerida e códigos JSON
+      cleanResponse = cleanResponse.replace(/\[ALTERACAO_SUGERIDA\].*?(?=\s|$)/g, '');
+      cleanResponse = cleanResponse.replace(/\{[^}]*"irrigationType"[^}]*\}/g, '');
+      cleanResponse = cleanResponse.replace(/```[\s\S]*?```/g, '');
+      cleanResponse = cleanResponse.replace(/`[^`]*`/g, '');
+      
+      // Remove quebras de linha excessivas
+      cleanResponse = cleanResponse.replace(/\n{3,}/g, '\n\n');
+      cleanResponse = cleanResponse.trim();
+      
+      return cleanResponse;
     } catch (error) {
       console.error("Erro ao gerar resposta do Gemini:", error);
       throw new Error("Erro ao comunicar com a IA. Tente novamente.");

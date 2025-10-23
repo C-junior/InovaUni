@@ -8,6 +8,8 @@ import {
   query,
   orderBy,
   limit,
+  collection,
+  writeBatch,
 } from "firebase/firestore";
 import {
   getUserFarmsCollection,
@@ -16,7 +18,9 @@ import {
   getFarmCalculationDoc,
   addTimestamp,
   addUpdateTimestamp,
+  db,
 } from "../services/firestore.js";
+import { getCurrentUser } from "../services/auth.js";
 
 export const useFarmsStore = defineStore("farms", {
   state: () => ({
@@ -24,6 +28,7 @@ export const useFarmsStore = defineStore("farms", {
     currentFarm: null,
     calculations: [],
     calculationHistory: {},
+    chatHistory: {}, // Histórico de conversas por fazenda
     loading: false,
     error: null,
   }),
@@ -37,6 +42,7 @@ export const useFarmsStore = defineStore("farms", {
       const calculations = state.calculationHistory[farmId] || [];
       return calculations.length > 0 ? calculations[0] : null;
     },
+    getFarmChatHistory: (state) => (farmId) => state.chatHistory[farmId] || [],
   },
 
   actions: {
@@ -397,6 +403,107 @@ export const useFarmsStore = defineStore("farms", {
     clearFarmCalculationHistory(farmId) {
       if (this.calculationHistory[farmId]) {
         delete this.calculationHistory[farmId];
+      }
+    },
+
+    /**
+     * Save chat message to Firestore
+     * @param {string} farmId - Farm ID
+     * @param {Object} message - Message object
+     */
+    async saveChatMessage(farmId, message) {
+      try {
+        const user = getCurrentUser();
+        if (!user) {
+          throw new Error('User must be authenticated to save chat messages');
+        }
+        
+        const chatCollection = collection(db, `users/${user.uid}/farms/${farmId}/chatHistory`);
+        
+        const messageRecord = {
+          ...message,
+          ...addTimestamp({})
+        };
+
+        const docRef = await addDoc(chatCollection, messageRecord);
+        
+        const newMessage = {
+          id: docRef.id,
+          ...messageRecord
+        };
+
+        // Update local state
+        if (!this.chatHistory[farmId]) {
+          this.chatHistory[farmId] = [];
+        }
+        this.chatHistory[farmId].push(newMessage);
+
+        return newMessage;
+      } catch (error) {
+        console.error("Error saving chat message:", error);
+        throw error;
+      }
+    },
+
+    /**
+     * Fetch chat history for a specific farm
+     * @param {string} farmId - Farm ID
+     */
+    async fetchFarmChatHistory(farmId) {
+      try {
+        const user = getCurrentUser();
+        if (!user) {
+          throw new Error('User must be authenticated to fetch chat history');
+        }
+        
+        const chatCollection = collection(db, `users/${user.uid}/farms/${farmId}/chatHistory`);
+        const q = query(chatCollection, orderBy("createdAt", "asc"));
+
+        const querySnapshot = await getDocs(q);
+
+        const messages = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        // Update local state
+        this.chatHistory[farmId] = messages;
+
+        return messages;
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+        throw error;
+      }
+    },
+
+    /**
+     * Clear chat history for a farm
+     * @param {string} farmId - Farm ID
+     */
+    async clearFarmChatHistory(farmId) {
+      try {
+        const user = getCurrentUser();
+        if (!user) {
+          throw new Error('User must be authenticated to clear chat history');
+        }
+        
+        const chatCollection = collection(db, `users/${user.uid}/farms/${farmId}/chatHistory`);
+        const querySnapshot = await getDocs(chatCollection);
+        
+        const batch = writeBatch(db);
+        querySnapshot.docs.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+
+        // Clear local state
+        if (this.chatHistory[farmId]) {
+          delete this.chatHistory[farmId];
+        }
+      } catch (error) {
+        console.error("Error clearing chat history:", error);
+        throw error;
       }
     },
 
