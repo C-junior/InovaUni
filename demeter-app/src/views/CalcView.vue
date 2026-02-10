@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
     <header class="bg-white shadow-soft border-b border-gray-100">
@@ -66,7 +66,7 @@
       <div v-if="showChat" class="animate-fade-in">
         <AIChat 
           :farm-data="farm"
-          :etc-data="calculationResult"
+          :etc-data="calculationResult?.result"
           @close="closeChat"
         />
       </div>
@@ -83,7 +83,7 @@
         </div>
 
         <!-- Results Display with AI Chat Button -->
-        <div v-if="calculationResult" class="mb-8 space-y-6">
+        <div v-if="calculationResult" ref="resultSection" class="mb-8 space-y-6">
           <ResultCard :result="calculationResult" />
           
           <!-- AI Chat Button -->
@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user.js'
 import { useFarmsStore } from '../stores/farms.js'
@@ -151,6 +151,7 @@ const farm = ref(null)
 const calculationResult = ref(null)
 const isLoading = ref(false)
 const showChat = ref(false)
+const resultSection = ref(null)
 
 const userDisplayName = computed(() => userStore.userDisplayName)
 const userEmail = computed(() => userStore.userEmail)
@@ -219,17 +220,21 @@ const handleCalculationComplete = async (calculationData) => {
     
     const etc = result.eto * kc
     
-    // Prepare complete result
+    // Keep a consistent payload shape used by ResultCard and farms store
     calculationResult.value = {
-      ...result,
-      etc: parseFloat(etc.toFixed(2)),
-      kc: kc,
-      radiation: inputs.solarRadiation || 15, // Define radiação solar padrão como 15 MJ/m²/dia
-      date: new Date().toISOString().split('T')[0],
-      farmId: farm.value.id,
-      farmName: farm.value.name,
-      crop: farm.value.crop,
-      inputs
+      inputs,
+      dataSource: calculationData.dataSource || 'manual',
+      farm: farm.value,
+      result: {
+        ...result,
+        etc: parseFloat(etc.toFixed(2)),
+        kc,
+        radiation: inputs.solarRadiation || 15, // Define radiacao solar padrao como 15 MJ/m2/dia
+        date: new Date().toISOString().split('T')[0],
+        farmId: farm.value.id,
+        farmName: farm.value.name,
+        crop: farm.value.crop
+      }
     }
     
     // Save calculation to Firestore
@@ -240,6 +245,12 @@ const handleCalculationComplete = async (calculationData) => {
     
     // Show success notification
     console.log('Calculation completed successfully:', calculationResult.value)
+
+    // Auto-scroll to results for better UX
+    await nextTick()
+    if (resultSection.value) {
+      resultSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   } catch (error) {
     console.error('Failed to save calculation:', error)
     // Still show the result even if saving fails

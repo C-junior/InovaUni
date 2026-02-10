@@ -89,7 +89,7 @@ export default {
     },
     etcData: {
       type: Object,
-      required: true
+      default: null
     }
   },
   setup() {
@@ -102,6 +102,14 @@ export default {
       newMessage: '',
       isLoading: false,
       messageIdCounter: 1
+    }
+  },
+  watch: {
+    etcData(newVal) {
+      // When etcData becomes available and no messages exist yet, initialize chat
+      if (newVal && this.messages.length === 0) {
+        this.initializeChat()
+      }
     }
   },
   async mounted() {
@@ -133,6 +141,12 @@ export default {
     async initializeChat() {
       // Se já tem mensagens no histórico, não adiciona mensagem inicial
       if (this.messages.length > 0) {
+        return
+      }
+
+      // Se etcData ainda não está disponível, aguardar (o watcher irá chamar novamente)
+      if (!this.etcData) {
+        await this.addMessage('ai', 'Olá! Sou seu especialista em irrigação. Aguardando os dados de evapotranspiração para gerar uma recomendação personalizada...')
         return
       }
       

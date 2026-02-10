@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+﻿import { defineStore } from "pinia";
 import {
   addDoc,
   updateDoc,
@@ -257,28 +257,31 @@ export const useFarmsStore = defineStore("farms", {
         // Validate calculation data
         this.validateCalculationData(calculationData);
 
+        const resultData = calculationData.result || calculationData;
+        const inputData = calculationData.inputs || resultData.inputs;
+
         const calculationsCollection = getFarmCalculationsCollection(farmId);
 
         // Prepare calculation record
         const calculationRecord = {
           farmId,
-          date: calculationData.result.calculationDate,
+          date: resultData.calculationDate,
           inputs: {
-            tmax: calculationData.inputs.tmax,
-            tmin: calculationData.inputs.tmin,
-            humidity: calculationData.inputs.humidity,
-            windSpeed: calculationData.inputs.windSpeed,
-            solarRadiation: calculationData.inputs.solarRadiation,
-            julianDay: calculationData.inputs.julianDay,
-            latitude: calculationData.result.inputs.latitude,
-            altitude: calculationData.result.inputs.altitude,
+            tmax: inputData.tmax,
+            tmin: inputData.tmin,
+            humidity: inputData.humidity,
+            windSpeed: inputData.windSpeed,
+            solarRadiation: inputData.solarRadiation,
+            julianDay: inputData.julianDay,
+            latitude: inputData.latitude,
+            altitude: inputData.altitude,
           },
-          intermediateValues: calculationData.result.intermediateValues,
+          intermediateValues: resultData.intermediateValues,
           result: {
-            eto: calculationData.result.eto,
+            eto: resultData.eto,
           },
           dataSource: calculationData.dataSource || "manual",
-          location: calculationData.result.location,
+          location: resultData.location,
           ...addTimestamp({}),
         };
 
@@ -417,16 +420,16 @@ export const useFarmsStore = defineStore("farms", {
         if (!user) {
           throw new Error('User must be authenticated to save chat messages');
         }
-        
+
         const chatCollection = collection(db, `users/${user.uid}/farms/${farmId}/chatHistory`);
-        
+
         const messageRecord = {
           ...message,
           ...addTimestamp({})
         };
 
         const docRef = await addDoc(chatCollection, messageRecord);
-        
+
         const newMessage = {
           id: docRef.id,
           ...messageRecord
@@ -455,7 +458,7 @@ export const useFarmsStore = defineStore("farms", {
         if (!user) {
           throw new Error('User must be authenticated to fetch chat history');
         }
-        
+
         const chatCollection = collection(db, `users/${user.uid}/farms/${farmId}/chatHistory`);
         const q = query(chatCollection, orderBy("createdAt", "asc"));
 
@@ -486,15 +489,15 @@ export const useFarmsStore = defineStore("farms", {
         if (!user) {
           throw new Error('User must be authenticated to clear chat history');
         }
-        
+
         const chatCollection = collection(db, `users/${user.uid}/farms/${farmId}/chatHistory`);
         const querySnapshot = await getDocs(chatCollection);
-        
+
         const batch = writeBatch(db);
         querySnapshot.docs.forEach((doc) => {
           batch.delete(doc.ref);
         });
-        
+
         await batch.commit();
 
         // Clear local state
@@ -516,11 +519,14 @@ export const useFarmsStore = defineStore("farms", {
         throw new Error("Dados de cálculo são obrigatórios");
       }
 
-      if (!calculationData.result || typeof calculationData.result.eto !== "number") {
+      const resultData = calculationData.result || calculationData;
+      const inputData = calculationData.inputs || resultData.inputs;
+
+      if (!resultData || typeof resultData.eto !== "number") {
         throw new Error("Resultado ETo é obrigatório");
       }
 
-      if (!calculationData.inputs || typeof calculationData.inputs !== "object") {
+      if (!inputData || typeof inputData !== "object") {
         throw new Error("Parâmetros de entrada são obrigatórios");
       }
 
@@ -533,7 +539,7 @@ export const useFarmsStore = defineStore("farms", {
         "julianDay",
       ];
       for (const input of requiredInputs) {
-        if (typeof calculationData.inputs[input] !== "number") {
+        if (typeof inputData[input] !== "number") {
           throw new Error(`Parâmetro ${input} é obrigatório e deve ser um número`);
         }
       }

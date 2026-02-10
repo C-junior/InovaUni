@@ -355,7 +355,9 @@ const performCalculation = async () => {
       humidity: inputData.humidity,
       windSpeed: inputData.windSpeed,
       solarRadiation: formData.solarRadiation,
-      julianDay: getJulianDay()
+      julianDay: getJulianDay(),
+      latitude: -10.0,
+      altitude: 230
     }
 
     // Perform calculation
